@@ -2,6 +2,8 @@
 
 Ce dépôt contient le code rédigé et fourni lors de la formation Go. Cette formation a pour objectif d'apprendre les bases du langage Go et ses cas d'usage. Celle-ci a eu lieu du 14 au 16 octobre 2024, dispensée par Paul Millet de l'organisme "LaMeDuSe".
 
+![alt text](supports/lameduse.png)
+
 ## Architecture du dépôt
 
 ```
@@ -17,6 +19,7 @@ formation_go/
 │   └── ...
 └── supports/
     ├── gog_v1_fr--2-
+    ├── pictureX.png
     └── ...
 ```
 
@@ -34,6 +37,10 @@ formation_go/
 
 ## Tps
 
+Version de Golang : 1.21.4
+
+OS : WSL 2 [Ubuntu 22.04.5]
+
 | TP  | Description                                           |
 | --- | ----------------------------------------------------- |
 | TP1 | Hello World                                           |
@@ -42,3 +49,5 @@ formation_go/
 | TP4 | Utilisation des Goroutines                            |
 | TP5 | Manipulation de fichiers                              |
 | TP6 | Calculatrice et tests (Bonus iterface graphique Fyne) |
+
+![alt text](supports/calc.png)
