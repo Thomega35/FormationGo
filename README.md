@@ -8,15 +8,15 @@ Ce dépôt contient le code rédigé et fourni lors de la formation Go. Cette fo
 formation_go/
 ├── README.md
 ├── code/
-│   ├── hello.go
+│   ├── sujetX/
+│   │   ├── packageX/
+│   │   │   └── packageX.go
+│   │   ├── go.mod
+│   │   ├── (go.sum)
+│   │   └── main.go
 │   └── ...
-├── supports/
-│   ├── 01_intro_go.pdf
-│   ├── 02_syntaxe_go.pdf
-│   └── ...
-└── exercices/
-    ├── 01_hello_world/
-    ├── 02_calculatrice/
+└── supports/
+    ├── gog_v1_fr--2-
     └── ...
 ```
 
@@ -31,3 +31,14 @@ formation_go/
 - Pierre AUFFRAY
 - Thomas DELAPART
 - Ugo OGER
+
+## Tps
+
+| TP  | Description                                           |
+| --- | ----------------------------------------------------- |
+| TP1 | Hello World                                           |
+| TP2 | Package avec fonctions de base mathématiques          |
+| TP3 | Structures, méthodes et hérédité                      |
+| TP4 | Utilisation des Goroutines                            |
+| TP5 | Manipulation de fichiers                              |
+| TP6 | Calculatrice et tests (Bonus iterface graphique Fyne) |
