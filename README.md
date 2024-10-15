@@ -93,9 +93,9 @@ Prérequis :
 - Avoir une base de données SQL (ici PostgreSQL) configurée avec les mêmes informations que le projet,
 ici :
     - user: postgres
-    - password: gopassword
+    - password: root
     - dbname: postgres
-    - host: localhost
+    - host: localhost (127.0.0.1)
     - port: 5432
 
 On peut ensuite directement lancer le projet avec la commande :

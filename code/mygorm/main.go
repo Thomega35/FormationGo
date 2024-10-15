@@ -18,7 +18,7 @@ type User struct {
 }
 
 func initDatabase() {
-	dsn := "host=172.19.61.166 user=postgres password=gormpassword dbname=postgres port=5432"
+	dsn := "host=127.0.0.1 user=postgres password=root dbname=postgres port=5432"
 	var err error
 	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
