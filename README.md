@@ -106,3 +106,5 @@ go run main.go
 ```
 
 On pourra alors voir l'initialisation de la base de données, l'insertion de données, la récupération de données, la modification et la suppression de données.
+
+![Logs of Gorm](supports/sql.png)
