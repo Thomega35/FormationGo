@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package protos_ext;
+
+service UserService {
+  rpc GetUser (GetUserRequest) returns (GetUserResponse);
+}
+
+message GetUserRequest {
+  string id = 1;
+}
+
+message GetUserResponse {
+  string id = 1;
+  string name = 2;
+  int32 age = 3;
+}
