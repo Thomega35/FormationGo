@@ -86,3 +86,23 @@ Une fois le serveur lancé, il est possible de lancer le client, dans un autre t
 ```bash
 go run mygrpc/client/client.go
 ```
+
+## POC Gorm
+
+Prérequis :
+- Avoir une base de données SQL (ici PostgreSQL) configurée avec les mêmes informations que le projet,
+ici :
+    - user: postgres
+    - password: gopassword
+    - dbname: postgres
+    - host: localhost
+    - port: 5432
+
+On peut ensuite directement lancer le projet avec la commande :
+
+```bash
+cd mygorm
+go run main.go
+```
+
+On pourra alors voir l'initialisation de la base de données, l'insertion de données, la récupération de données, la modification et la suppression de données.
