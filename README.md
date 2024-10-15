@@ -108,3 +108,25 @@ go run main.go
 On pourra alors voir l'initialisation de la base de données, l'insertion de données, la récupération de données, la modification et la suppression de données.
 
 ![Logs of Gorm](supports/sql.png)
+
+## POC Gin-Gonic
+
+Avec Gin-Gonic, on peut créer des routes et des middlewares pour notre serveur HTTP. On a ici une liste de routes qui sont accessibles via un navigateur web sur l'adresse http://localhost:8080.
+
+Pour lancer le serveur, il suffit de lancer la commande :
+
+```bash
+cd mygingonic
+go run main.go
+```
+
+On pourra alors voir les logs du serveur et les requêtes effectuées sur les différentes routes dans le terminal.
+
+Et via un navigateur ou un autre terminal, on pourra accéder aux différentes routes :
+
+```bash	
+curl http://localhost:8080/ping
+curl http://localhost:8080/users
+curl -X POST http://localhost:8080/users -H "Content-Type: application/json" -d "\"Dave\""
+curl -X DELETE http://localhost:8080/users/1
+```
