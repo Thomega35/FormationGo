@@ -68,11 +68,28 @@ Il faut compiler les protobuff pour générer les fichiers go correspondants si 
 
 Pour cela, on définit deux varibles d'environnement et on lance la commande protoc.
 ```bash
-export GO_MOD=bitbucket.org/lameduse/beforeafter-core-service
+export GO_MOD=bitbucket.org/mygrpc
 
 export PROTOBUF_DIR=./proto
 
-protoc --experimental_allow_proto3_optional --go_out=src --go_opt=paths=source_relative --go_opt=Mprotos_ext/mygrpc.proto=$GO_MOD/protos_ext protos_ext/mygrpc.proto --go-grpc_out=src --go-grpc_opt=paths=source_relative --go-grpc_opt=Mprotos_ext/mygrpc.proto=$GO_MOD/protos_ext protos_ext/mygrpc.proto
+protoc --experimental_allow_proto3_optional --go_out=src --go_opt=paths=source_relative --go_opt=Mprotos_ext/mygrpc.proto=$GO_MOD/protos_ext --go-grpc_out=src --go-grpc_opt=paths=source_relative --go-grpc_opt=Mprotos_ext/mygrpc.proto=$GO_MOD/protos_ext protos_ext/mygrpc.proto
+```
+
+Avec grpcGateway, on peut générer un client HTTP pour communiquer avec le serveur gRPC. 
+
+Il nous faut pour utiliser Gateway, récupérer la librairie google-api et la placer dans le répertoire google comme mentionné dans le .gitignore. Pour cela :
+```bash
+cd code/mygrpc/
+git clone https://github.com/googleapis/googleapis
+mv googleapis google
+go mod tidy
+```
+
+Une fois la librairie installé, il est possible de lancer la commande suivante pour compiler l'autre protobuff dans /src/proto au lieu de /src/protos_ext :
+
+```bash
+
+protoc --experimental_allow_proto3_optional --go_out=src --go_opt=paths=source_relative --go_opt=Mproto/mygrpc.proto=$GO_MOD/proto --go-grpc_out=src --go-grpc_opt=paths=source_relative --go-grpc_opt=Mproto/mygrpc.proto=$GO_MOD/proto --grpc-gateway_out=src --grpc-gateway_opt=paths=source_relative --grpc-gateway_opt=Mproto/mygrpc.proto=$GO_MOD/proto --proto_path=. proto/mygrpc.proto 
 ```
 
 ### Lancer le serveur
