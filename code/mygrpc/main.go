@@ -88,7 +88,7 @@ func (s *server) DeleteUser(ctx context.Context, req *pb.DeleteUserRequest) (*pb
 	return &pb.DeleteUserResponse{Id: req.Id}, nil
 }
 
-func startGrpcServer() {
+func startGrpcServer() *grpc.Server {
 	lis, err := net.Listen("tcp", ":50051")
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
@@ -99,12 +99,16 @@ func startGrpcServer() {
 	pb.RegisterUserServiceServer(s, service)
 
 	log.Printf("gRPC server listening at %v", lis.Addr())
-	if err := s.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
-	}
+	go func() {
+		if err := s.Serve(lis); err != nil {
+			log.Fatalf("failed to serve: %v", err)
+		}
+	}()
+
+	return s
 }
 
-func startHttpServer() {
+func startHttpServer() *http.Server {
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
@@ -117,10 +121,19 @@ func startHttpServer() {
 		log.Fatalf("could not register service handler: %v", err)
 	}
 
-	log.Println("HTTP server listening at :8080")
-	if err := http.ListenAndServe(":8080", mux); err != nil {
-		log.Fatalf("failed to serve: %v", err)
+	srv := &http.Server{
+		Addr:    ":8080",
+		Handler: mux,
 	}
+
+	go func() {
+		log.Println("HTTP server listening at :8080")
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("failed to serve: %v", err)
+		}
+	}()
+
+	return srv
 }
 
 func callRpcClient(c pb.UserServiceClient, ctx context.Context) {
@@ -218,7 +231,7 @@ func startClient() {
 	// Set up a connection to the gRPC server
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
-	conn, err := grpc.NewClient("passthrough:///localhost:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.Dial("localhost:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
@@ -236,17 +249,31 @@ func startClient() {
 
 func main() {
 	if len(os.Args) < 2 {
-		log.Fatalf("Usage: %s <server|client>", os.Args[0])
+		log.Fatalf("Usage: %s <server|client|all>", os.Args[0])
 	}
 
 	switch os.Args[1] {
 	case "server":
-		go startGrpcServer()
+		startGrpcServer()
 		startHttpServer()
+		// Block main goroutine so servers continue running
+		select {}
 	case "client":
 		startClient()
+	case "all":
+		done := make(chan struct{})
+		go func() {
+			grpcServer := startGrpcServer()
+			httpServer := startHttpServer()
+			<-done
+			grpcServer.GracefulStop()
+			httpServer.Shutdown(context.Background())
+		}()
+		time.Sleep(1 * time.Second) // Give the server a second to start
+		startClient()
+		close(done)
 	default:
-		log.Fatalf("Usage: %s <server|client>", os.Args[0])
+		log.Fatalf("Usage: %s <server|client|all>", os.Args[0])
 	}
 }
 
@@ -254,6 +281,8 @@ func main() {
 // go run main.go server
 // Pour lancer le client, exécutez:
 // go run main.go client
+// Pour lancer les deux en même temps, exécutez:
+// go run main.go all
 // Vous devriez voir la sortie suivante:
 // Date Time server listening at
 // Date Time Greeting: John Doe
