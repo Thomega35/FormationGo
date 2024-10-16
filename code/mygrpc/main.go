@@ -239,7 +239,7 @@ func startClient(done chan<- struct{}) {
 	// Set up a connection to the gRPC server
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
-	conn, err := grpc.Dial("localhost:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient("localhost:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
@@ -298,8 +298,20 @@ func main() {
 // Pour lancer les deux en même temps, exécutez:
 // go run main.go all
 // Vous devriez voir la sortie suivante:
-// Date Time server listening at
-// Date Time Greeting: John Doe
+// --- RPC ---
+// 2024/10/16 14:29:00 RPC CreateUser took 2.035034ms
+// 2024/10/16 14:29:00 Created User ID: 1
+// 2024/10/16 14:29:00 RPC ListUsers took 411.66µs
+// 2024/10/16 14:29:00 User: 1, Name: Alice, Age: 22
+// 2024/10/16 14:29:00 RPC DeleteUser took 365.157µs
+// 2024/10/16 14:29:00 Deleted User ID: 1
+// --- HTTP ---
+// 2024/10/16 14:29:00 HTTP CreateUser took 37.991717ms
+// 2024/10/16 14:29:00 Created User ID: 1
+// 2024/10/16 14:29:00 HTTP ListUsers took 512.17µs
+// 2024/10/16 14:29:00 User: 1, Name: Alice, Age: 22
+// 2024/10/16 14:29:00 HTTP DeleteUser took 539.273µs
+// 2024/10/16 14:29:00 Deleted User ID: 1
 //
 // Vous pouvez également tester le serveur avec un client gRPC généré en utilisant le fichier protos_ext.pb.go.
 //

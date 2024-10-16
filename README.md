@@ -92,16 +92,44 @@ Une fois la librairie installé, il est possible de lancer la commande suivante 
 protoc --experimental_allow_proto3_optional --go_out=src --go_opt=paths=source_relative --go_opt=Mproto/mygrpc.proto=$GO_MOD/proto --go-grpc_out=src --go-grpc_opt=paths=source_relative --go-grpc_opt=Mproto/mygrpc.proto=$GO_MOD/proto --grpc-gateway_out=src --grpc-gateway_opt=paths=source_relative --grpc-gateway_opt=Mproto/mygrpc.proto=$GO_MOD/proto --proto_path=. proto/mygrpc.proto 
 ```
 
-### Lancer le serveur
+### Lancer le serveur grpc v1
+
+Pour lancer la v1 du serveur, il faut renomer le fichier main.go en temp.go et renomer main_v1.go en main.go.
 
 ```bash
-go run mygrpc/server/server.go
+go run main.go server
 ```
 
 Une fois le serveur lancé, il est possible de lancer le client, dans un autre terminal :
 
 ```bash
-go run mygrpc/client/client.go
+go run main.go client
+```
+
+### Lancer le serveur grpc-gateway
+
+Il est possible de tester le serveur comme dans la version précedente en utilisant le fichier main.go cette fois. Soit de nouveau avec 2 terminaux serveur + client ou cette fois d'utiliser la commande qui combine les deux dans un seul terminal avec des goroutines :
+
+```bash
+go run main.go all
+```
+
+Le résultat du terminal devrait avoir la forme suivante : 
+```bash
+--- RPC ---
+2024/10/16 14:29:00 RPC CreateUser took 2.035034ms
+2024/10/16 14:29:00 Created User ID: 1
+2024/10/16 14:29:00 RPC ListUsers took 411.66µs
+2024/10/16 14:29:00 User: 1, Name: Alice, Age: 22
+2024/10/16 14:29:00 RPC DeleteUser took 365.157µs
+2024/10/16 14:29:00 Deleted User ID: 1
+--- HTTP ---
+2024/10/16 14:29:00 HTTP CreateUser took 37.991717ms
+2024/10/16 14:29:00 Created User ID: 1
+2024/10/16 14:29:00 HTTP ListUsers took 512.17µs
+2024/10/16 14:29:00 User: 1, Name: Alice, Age: 22
+2024/10/16 14:29:00 HTTP DeleteUser took 539.273µs
+2024/10/16 14:29:00 Deleted User ID: 1
 ```
 
 ## POC Gorm
