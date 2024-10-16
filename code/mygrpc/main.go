@@ -88,7 +88,7 @@ func (s *server) DeleteUser(ctx context.Context, req *pb.DeleteUserRequest) (*pb
 	return &pb.DeleteUserResponse{Id: req.Id}, nil
 }
 
-func startGrpcServer() *grpc.Server {
+func startGrpcServer(ready chan<- struct{}) *grpc.Server {
 	lis, err := net.Listen("tcp", ":50051")
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
@@ -98,8 +98,11 @@ func startGrpcServer() *grpc.Server {
 	service := &server{users: make(map[string]*pb.GetUserResponse)}
 	pb.RegisterUserServiceServer(s, service)
 
-	log.Printf("gRPC server listening at %v", lis.Addr())
 	go func() {
+		log.Printf("gRPC server listening at %v", lis.Addr())
+		if ready != nil {
+			ready <- struct{}{}
+		}
 		if err := s.Serve(lis); err != nil {
 			log.Fatalf("failed to serve: %v", err)
 		}
@@ -108,10 +111,8 @@ func startGrpcServer() *grpc.Server {
 	return s
 }
 
-func startHttpServer() *http.Server {
+func startHttpServer(ready chan<- struct{}) *http.Server {
 	ctx := context.Background()
-	ctx, cancel := context.WithCancel(ctx)
-	defer cancel()
 
 	mux := runtime.NewServeMux()
 	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
@@ -128,6 +129,9 @@ func startHttpServer() *http.Server {
 
 	go func() {
 		log.Println("HTTP server listening at :8080")
+		if ready != nil {
+			ready <- struct{}{}
+		}
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("failed to serve: %v", err)
 		}
@@ -227,7 +231,11 @@ func callHttpClient() {
 	log.Printf("Deleted User ID: %s", deleteResp.GetId())
 }
 
-func startClient() {
+func startClient(done chan<- struct{}) {
+	if done != nil {
+		defer close(done)
+	}
+
 	// Set up a connection to the gRPC server
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
@@ -254,24 +262,30 @@ func main() {
 
 	switch os.Args[1] {
 	case "server":
-		startGrpcServer()
-		startHttpServer()
+		startGrpcServer(nil)
+		startHttpServer(nil)
 		// Block main goroutine so servers continue running
 		select {}
 	case "client":
-		startClient()
+		startClient(nil)
 	case "all":
-		done := make(chan struct{})
+		serverReady := make(chan struct{}, 2) // Buffer size 2 to handle both servers
+		clientDone := make(chan struct{})
+
 		go func() {
-			grpcServer := startGrpcServer()
-			httpServer := startHttpServer()
-			<-done
+			grpcServer := startGrpcServer(serverReady)
+			httpServer := startHttpServer(serverReady)
+			<-clientDone
 			grpcServer.GracefulStop()
 			httpServer.Shutdown(context.Background())
 		}()
-		time.Sleep(1 * time.Second) // Give the server a second to start
-		startClient()
-		close(done)
+
+		// Wait for both servers to be ready
+		<-serverReady
+		<-serverReady
+
+		// Start client
+		startClient(clientDone)
 	default:
 		log.Fatalf("Usage: %s <server|client|all>", os.Args[0])
 	}
